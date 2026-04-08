@@ -24,8 +24,12 @@ def get_settings():
     return {s['key_name']: s['value_text'] for s in settings}
 
 @app.context_processor
+@app.context_processor
 def inject_settings():
-    return dict(settings=get_settings())
+    try:
+        return dict(settings=get_settings())
+    except:
+        return dict(settings={})
 
 # --- PUBLIC ROUTES ---
 @app.route('/health')
