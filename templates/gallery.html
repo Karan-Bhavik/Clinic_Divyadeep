@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="bg-brand-900 py-16 text-center">
+    <h1 class="text-4xl font-extrabold text-white mb-4">Clinic Gallery & Procedures</h1>
+    <p class="text-brand-100 text-lg max-w-2xl mx-auto">Explore our state-of-the-art facility and procedure results.</p>
+</div>
+
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white py-8 rounded shadow">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {% for img in images %}
+            <div class="group relative block overflow-hidden rounded-xl bg-gray-100">
+                <img src="{{ url_for('static', filename=img.image_path) }}" class="object-cover w-full h-64 transition duration-500 group-hover:scale-105" alt="Gallery Image" />
+                {% if img.caption %}
+                <div class="absolute inset-0 flex items-end bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p class="text-white p-4 font-medium">{{ img.caption }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="col-span-1 sm:col-span-2 md:col-span-3 text-center text-gray-500 py-16">
+                No images in the gallery yet.
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

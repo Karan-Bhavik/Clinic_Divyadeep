@@ -1,0 +1,71 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold text-gray-800">Clinic & Doctor Settings</h2>
+        <p class="text-gray-600">Update the information displayed on the website.</p>
+    </div>
+
+    <form method="POST" class="space-y-8">
+        
+        <!-- Doctor Profile Segment -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">Doctor Portfolio</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Doctor Name</label>
+                    <input type="text" name="doctor_name" value="{{ settings.get('doctor_name', '') }}" class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Main Qualifications String</label>
+                    <input type="text" name="doctor_qualifications" value="{{ settings.get('doctor_qualifications', '') }}" class="w-full border p-2 rounded">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Extended Bio / Portfolio</label>
+                    <textarea name="doctor_bio" rows="4" class="w-full border p-2 rounded">{{ settings.get('doctor_bio', '') }}</textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Education (Separate by | )</label>
+                    <input type="text" name="doctor_education" value="{{ settings.get('doctor_education', '') }}" class="w-full border p-2 rounded" placeholder="MD Derm|Fellowship">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Awards/Achievements (Separate by | )</label>
+                    <input type="text" name="doctor_achievements" value="{{ settings.get('doctor_achievements', '') }}" class="w-full border p-2 rounded">
+                </div>
+            </div>
+        </div>
+
+        <!-- Clinic Profile Segment -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">Contact & Location</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Clinic Name</label>
+                    <input type="text" name="clinic_name" value="{{ settings.get('clinic_name', '') }}" class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Phone Number</label>
+                    <input type="text" name="phone" value="{{ settings.get('phone', '') }}" class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Reception Phone</label>
+                    <input type="text" name="reception_phone" value="{{ settings.get('reception_phone', '') }}" class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Address (supports HTML)</label>
+                    <textarea name="address" rows="3" class="w-full border p-2 rounded">{{ settings.get('address', '') }}</textarea>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Working Hours & Weekly Offs (supports HTML)</label>
+                    <textarea name="working_hours" rows="3" class="w-full border p-2 rounded" placeholder="Mon-Sat: 10AM-8PM <br/> Sunday: Closed">{{ settings.get('working_hours', '') }}</textarea>
+                    <p class="text-xs text-gray-500 mt-1">Use <code>&lt;br/&gt;</code> to jump to a new line.</p>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded shadow-lg text-lg">Save All Settings</button>
+        </div>
+    </form>
+
+{% endblock %}

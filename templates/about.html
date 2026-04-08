@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Page Header -->
+<div class="bg-brand-900 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl font-extrabold text-white mb-4">Meet the Expert</h1>
+    </div>
+</div>
+
+<!-- Doctor Profile Section -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row gap-16 items-start">
+            
+            <div class="w-full lg:w-1/3 relative">
+                <img src="{{ url_for('static', filename='assets/dr_kuldeep.png') }}" class="w-full rounded-2xl shadow-2xl object-cover border-4 border-white" />
+            </div>
+
+            <div class="w-full lg:w-2/3">
+                <div class="mb-2 inline-block py-1 px-3 rounded-full bg-brand-50 text-brand-600 text-sm font-semibold tracking-wider uppercase border border-brand-100">Chief Dermatologist</div>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">{{ settings.get('doctor_name') }}</h2>
+                <p class="text-brand-600 text-lg font-medium mb-6">{{ settings.get('doctor_qualifications') }}</p>
+                
+                <p class="text-gray-600 text-lg mb-8 leading-relaxed">
+                    {{ settings.get('doctor_bio') }}
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                        <h3 class="font-bold text-gray-900 text-xl mb-4 flex items-center"><i class="fa-solid fa-graduation-cap text-brand-500 mr-3"></i> Qualifications</h3>
+                        <ul class="space-y-3 text-gray-600">
+                            {% for item in settings.get('doctor_education', '').split('|') %}
+                            <li class="flex items-start"><i class="fa-solid fa-circle-check text-green-500 mt-1 mr-3 text-sm"></i> {{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                        <h3 class="font-bold text-gray-900 text-xl mb-4 flex items-center"><i class="fa-solid fa-award text-brand-500 mr-3"></i> Achievements</h3>
+                        <ul class="space-y-3 text-gray-600">
+                            {% for item in settings.get('doctor_achievements', '').split('|') %}
+                            <li class="flex items-start"><i class="fa-solid fa-circle-check text-green-500 mt-1 mr-3 text-sm"></i> {{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('contact') }}" class="inline-flex items-center justify-center px-8 py-4 bg-brand-600 text-white font-bold rounded-full hover:bg-brand-700 transition-colors shadow-lg">
+                    Book Consultation <i class="fa-solid fa-arrow-right ml-2 text-sm"></i>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

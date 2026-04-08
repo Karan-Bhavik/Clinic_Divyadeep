@@ -1,0 +1,79 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold text-gray-800">Manage Treatments</h2>
+        <p class="text-gray-600">Add or manage treatment categories and services.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        
+        <!-- Add Category Form -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold text-gray-800 border-b pb-2 mb-4">Add New Category</h3>
+            <form method="POST" class="space-y-4">
+                <input type="hidden" name="action" value="add_category">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Category Name</label>
+                    <input type="text" name="name" required class="w-full border p-2 rounded" placeholder="e.g. Skin & Dermatology">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Font Awesome Icon Class</label>
+                    <input type="text" name="icon" required class="w-full border p-2 rounded" placeholder="e.g. fa-solid fa-face-smile">
+                </div>
+                <button type="submit" class="bg-teal-600 text-white font-bold py-2 px-4 rounded w-full">Add Category</button>
+            </form>
+        </div>
+
+        <!-- Add Treatment Form -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold text-gray-800 border-b pb-2 mb-4">Add New Treatment</h3>
+            <form method="POST" class="space-y-4">
+                <input type="hidden" name="action" value="add_treatment">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Select Category</label>
+                    <select name="category_id" class="w-full border p-2 rounded" required>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Treatment Name</label>
+                    <input type="text" name="name" required class="w-full border p-2 rounded" placeholder="e.g. PRP Therapy">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Short Description</label>
+                    <textarea name="description" rows="2" required class="w-full border p-2 rounded"></textarea>
+                </div>
+                <button type="submit" class="bg-teal-600 text-white font-bold py-2 px-4 rounded w-full">Add Treatment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Live Treatments List -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="font-bold text-gray-800">Current active treatments</h3>
+        </div>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-50 text-gray-600 uppercase text-xs">
+                    <th class="py-3 px-6 border-b">Category</th>
+                    <th class="py-3 px-6 border-b">Treatment Name</th>
+                    <th class="py-3 px-6 border-b">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in treatments %}
+                <tr class="hover:bg-gray-50 text-sm border-b">
+                    <td class="py-3 px-6 font-bold text-gray-900">{{ t.category_name }}</td>
+                    <td class="py-3 px-6 font-medium text-teal-600">{{ t.name }}</td>
+                    <td class="py-3 px-6 text-gray-600">{{ t.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

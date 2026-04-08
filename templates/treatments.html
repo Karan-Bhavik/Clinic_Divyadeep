@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="bg-brand-900 py-16 text-center">
+    <h1 class="text-4xl font-extrabold text-white mb-4">Our Treatments & Services</h1>
+    <p class="text-brand-100 text-lg max-w-2xl mx-auto">Comprehensive solutions for beautiful skin and healthy hair.</p>
+</div>
+
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {% for cat in categories %}
+        <div class="mb-16">
+            <div class="flex items-center mb-8 border-b border-gray-200 pb-4">
+                <i class="{{ cat.icon }} text-3xl text-brand-600 mr-4"></i>
+                <h2 class="text-3xl font-bold text-gray-900">{{ cat.name }}</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for t in treatments if t.category_id == cat.id %}
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t.name }}</h3>
+                    <p class="text-gray-600 mb-4">{{ t.description }}</p>
+                    <a href="{{ url_for('contact') }}" class="text-brand-600 font-semibold text-sm hover:underline">Book Consultation</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        
+    </div>
+</section>
+
+{% endblock %}

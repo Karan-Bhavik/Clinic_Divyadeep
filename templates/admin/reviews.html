@@ -1,0 +1,46 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+
+    <div class="mb-6">
+        <h2 class="text-3xl font-bold text-gray-800">Manage Reviews</h2>
+        <p class="text-gray-600">Review patient submissions and push them to the Home Page.</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-50 text-gray-600 uppercase text-xs">
+                    <th class="py-3 px-6 border-b">Patient Name</th>
+                    <th class="py-3 px-6 border-b">Service</th>
+                    <th class="py-3 px-6 border-b">Rating</th>
+                    <th class="py-3 px-6 border-b">Review Text</th>
+                    <th class="py-3 px-6 border-b">Date</th>
+                    <th class="py-3 px-6 border-b text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for review in reviews %}
+                <tr class="hover:bg-gray-50 text-sm border-b {% if not review.is_approved %}bg-yellow-50{% endif %}">
+                    <td class="py-3 px-6 font-bold text-gray-900">{{ review.patient_name }}</td>
+                    <td class="py-3 px-6 text-gray-600">{{ review.service_name }}</td>
+                    <td class="py-3 px-6 text-yellow-500 font-bold">{{ review.rating }}★</td>
+                    <td class="py-3 px-6 text-gray-700 italic max-w-xs truncate">"{{ review.review_text }}"</td>
+                    <td class="py-3 px-6 text-gray-500 text-xs">{{ review.created_at }}</td>
+                    <td class="py-3 px-6 text-center">
+                        {% if review.is_approved %}
+                            <span class="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs font-bold">Approved (Live)</span>
+                        {% else %}
+                            <a href="{{ url_for('approve_review', review_id=review.id) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded text-xs">Push to Home</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="py-6 text-center text-gray-500">No reviews found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
