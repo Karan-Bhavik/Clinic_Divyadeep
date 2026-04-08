@@ -6,6 +6,18 @@ from werkzeug.utils import secure_filename
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+def init_db():
+    db_path = os.path.join(basedir, 'database.db')
+    if not os.path.exists(db_path):
+        conn = sqlite3.connect(db_path)
+        with open(os.path.join(basedir, 'schema.sql'), 'r') as f:
+            conn.executescript(f.read())
+        conn.commit()
+        conn.close()
+        
+# Call this before app starts
+init_db()
+
 app = Flask(__name__)
 app.secret_key = 'divyadeep_secret_key_123'
 app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'static', 'uploads')
