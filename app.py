@@ -219,7 +219,6 @@ def admin_gallery():
     images = conn.execute('SELECT * FROM gallery ORDER BY id DESC').fetchall()
     conn.close()
     return render_template('admin/gallery.html', images=images)
-
+    
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run()
