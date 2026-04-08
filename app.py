@@ -8,11 +8,10 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 app.secret_key = 'divyadeep_secret_key_123'
-app.config['UPLOAD_FOLDER'] = os.path.join('/tmp', 'uploads')  # FIX 1: use /tmp for writable path on Railway
+app.config['UPLOAD_FOLDER'] = os.path.join('/tmp', 'uploads')  # /tmp is writable on Railway
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# FIX 2: init_db AFTER app is created, and with error handling
 def init_db():
     db_path = os.path.join(basedir, 'database.db')
     if not os.path.exists(db_path):
@@ -20,6 +19,41 @@ def init_db():
             conn = sqlite3.connect(db_path)
             with open(os.path.join(basedir, 'schema.sql'), 'r') as f:
                 conn.executescript(f.read())
+            cur = conn.cursor()
+            # Prepopulate Settings
+            settings_data = [
+                ('clinic_name', 'Divyadeep Skin Laser and Hair Transplant Centre'),
+                ('address', 'Divyadeep Skin Laser and Hair Transplant Centre,<br/>Jhansi, Uttar Pradesh, India'),
+                ('phone', '+91 XXXXX XXXXX'),
+                ('reception_phone', '+91 XXXXX XXXXX'),
+                ('working_hours', 'Monday - Saturday: 10:00 AM - 8:00 PM<br/>Sunday: Closed'),
+                ('doctor_name', 'Dr. Kuldeep Verma'),
+                ('doctor_qualifications', 'MD, DNB (Dermatology, Venereology & Leprosy), Hair Transplant Specialist'),
+                ('doctor_bio', 'Dr. Kuldeep Verma is a highly qualified and renowned dermatologist based in Jhansi, Uttar Pradesh. With a deep passion for clinical dermatology and aesthetic medicine, he has helped thousands of patients achieve healthy, glowing skin and restored confidence through advanced hair transplant procedures.'),
+                ('doctor_education', 'MD Dermatology|DNB (National Board of Examinations)|Fellowship in Aesthetic Medicine'),
+                ('doctor_achievements', 'National-level research publications|Advanced Training in Hair Transplants|Member of leading Dermatological Societies')
+            ]
+            cur.executemany("INSERT INTO settings (key_name, value_text) VALUES (?, ?)", settings_data)
+            # Prepopulate Categories
+            categories_data = [
+                ('Hair & Scalp Care', 'fa-solid fa-scissors'),
+                ('Skin & Dermatology', 'fa-solid fa-face-smile'),
+                ('Advanced Laser Treatments', 'fa-solid fa-wand-magic-sparkles')
+            ]
+            cur.executemany("INSERT INTO categories (name, icon) VALUES (?, ?)", categories_data)
+            # Prepopulate Treatments
+            treatments_data = [
+                (1, 'Hair Transplant Surgery', 'FUE techniques providing permanent, natural-looking results with minimal downtime.'),
+                (1, 'PRP Therapy', 'Platelet-Rich Plasma therapy to stimulate natural hair growth and increase thickness.'),
+                (1, 'Hair Fall Treatment', 'Medical management and diagnosis to stop excessive hair loss and promote regrowth.'),
+                (2, 'Acne & Scar Treatment', 'Targeted therapies including peels, medication, and lasers for acne-free clear skin.'),
+                (2, 'Vitiligo Treatment', 'Advanced medical and surgical treatments to repigment the white patches.'),
+                (2, 'Pigmentation & Melasma', 'Effective treatments to reduce dark spots and ensure an even skin tone.'),
+                (3, 'Laser Hair Removal', 'Painless diode laser technology for permanent reduction of unwanted body hair.'),
+                (3, 'Tattoo Removal', 'Safe Q-switched laser treatments to fade and remove unwanted tattoos.'),
+                (3, 'CO2 Fractional Laser', 'Resurfacing treatment for severe scars, stretch marks, and skin rejuvenation.')
+            ]
+            cur.executemany("INSERT INTO treatments (category_id, name, description) VALUES (?, ?, ?)", treatments_data)
             conn.commit()
             conn.close()
             print("Database initialized successfully.")
@@ -39,7 +73,6 @@ def get_settings():
     conn.close()
     return {s['key_name']: s['value_text'] for s in settings}
 
-# FIX 3: removed duplicate @app.context_processor decorator
 @app.context_processor
 def inject_settings():
     try:
