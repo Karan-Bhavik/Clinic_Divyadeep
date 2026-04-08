@@ -6,23 +6,27 @@ from werkzeug.utils import secure_filename
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+app = Flask(__name__)
+app.secret_key = 'divyadeep_secret_key_123'
+app.config['UPLOAD_FOLDER'] = os.path.join('/tmp', 'uploads')  # FIX 1: use /tmp for writable path on Railway
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# FIX 2: init_db AFTER app is created, and with error handling
 def init_db():
     db_path = os.path.join(basedir, 'database.db')
     if not os.path.exists(db_path):
-        conn = sqlite3.connect(db_path)
-        with open(os.path.join(basedir, 'schema.sql'), 'r') as f:
-            conn.executescript(f.read())
-        conn.commit()
-        conn.close()
-        
-# Call this before app starts
-init_db()
+        try:
+            conn = sqlite3.connect(db_path)
+            with open(os.path.join(basedir, 'schema.sql'), 'r') as f:
+                conn.executescript(f.read())
+            conn.commit()
+            conn.close()
+            print("Database initialized successfully.")
+        except Exception as e:
+            print(f"Database initialization error: {e}")
 
-app = Flask(__name__)
-app.secret_key = 'divyadeep_secret_key_123'
-app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'static', 'uploads')
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16 MB limit
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+init_db()
 
 def get_db_connection():
     conn = sqlite3.connect(os.path.join(basedir, 'database.db'))
@@ -35,7 +39,7 @@ def get_settings():
     conn.close()
     return {s['key_name']: s['value_text'] for s in settings}
 
-@app.context_processor
+# FIX 3: removed duplicate @app.context_processor decorator
 @app.context_processor
 def inject_settings():
     try:
@@ -46,7 +50,7 @@ def inject_settings():
 # --- PUBLIC ROUTES ---
 @app.route('/health')
 def health():
-    return "OK"
+    return "OK", 200
 
 @app.route('/')
 def index():
@@ -59,7 +63,6 @@ def index():
 
 @app.route('/about')
 def about():
-    # Will use settings injected via context_processor
     return render_template('about.html')
 
 @app.route('/treatments')
@@ -79,7 +82,6 @@ def gallery():
 
 @app.route('/contact')
 def contact():
-    # settings injected
     return render_template('contact.html')
 
 @app.route('/book', methods=['POST'])
@@ -90,16 +92,14 @@ def book_appointment():
     message = request.form.get('message', '')
 
     today = date.today().isoformat()
-    
+
     conn = get_db_connection()
-    
-    # Calculate token number & expected time
-    # Assuming clinic opens at 10:00 AM, 15 mins per appointment
+
     appointments_today = conn.execute('SELECT COUNT(*) as count FROM appointments WHERE date = ?', (today,)).fetchone()
     count = appointments_today['count']
-    
+
     token_number = f"TKN-{today.replace('-','')}-{count + 1}"
-    
+
     start_time = datetime.strptime("10:00 AM", "%I:%M %p")
     expected_time = (start_time + timedelta(minutes=15 * count)).strftime("%I:%M %p")
 
@@ -107,8 +107,7 @@ def book_appointment():
                  (name, phone, service, message, today, token_number, expected_time))
     conn.commit()
     conn.close()
-    
-    # Pass token to template
+
     return render_template('token_success.html', token_number=token_number, expected_time=expected_time)
 
 @app.route('/submit-review', methods=['POST'])
@@ -117,13 +116,13 @@ def submit_review():
     rating = request.form['rating']
     review_text = request.form['review_text']
     service_name = request.form.get('service_name', '')
-    
+
     conn = get_db_connection()
     conn.execute('INSERT INTO reviews (patient_name, rating, review_text, service_name, is_approved) VALUES (?, ?, ?, ?, 0)',
                  (patient_name, rating, review_text, service_name))
     conn.commit()
     conn.close()
-    
+
     flash("Review submitted successfully! It will appear on the website once approved by the clinic.")
     return redirect(url_for('index'))
 
@@ -164,13 +163,13 @@ def admin_logout():
 def admin_settings():
     if not login_required(): return redirect(url_for('admin_login'))
     conn = get_db_connection()
-    
+
     if request.method == 'POST':
         for key in request.form:
             conn.execute('UPDATE settings SET value_text = ? WHERE key_name = ?', (request.form[key], key))
         conn.commit()
         flash("Settings updated successfully.")
-        
+
     settings = conn.execute('SELECT * FROM settings').fetchall()
     conn.close()
     return render_template('admin/settings.html', settings={s['key_name']: s['value_text'] for s in settings})
@@ -196,13 +195,14 @@ def approve_review(review_id):
 def admin_treatments():
     if not login_required(): return redirect(url_for('admin_login'))
     conn = get_db_connection()
-    
+
     if request.method == 'POST':
         action = request.form.get('action')
         if action == 'add_category':
             conn.execute('INSERT INTO categories (name, icon) VALUES (?, ?)', (request.form['name'], request.form['icon']))
         elif action == 'add_treatment':
-            conn.execute('INSERT INTO treatments (category_id, name, description) VALUES (?, ?, ?)', (request.form['category_id'], request.form['name'], request.form['description']))
+            conn.execute('INSERT INTO treatments (category_id, name, description) VALUES (?, ?, ?)',
+                         (request.form['category_id'], request.form['name'], request.form['description']))
         conn.commit()
         return redirect(url_for('admin_treatments'))
 
@@ -224,7 +224,7 @@ def admin_gallery():
         if file.filename == '':
             flash("No image selected")
             return redirect(request.url)
-        
+
         if file:
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -235,7 +235,8 @@ def admin_gallery():
     images = conn.execute('SELECT * FROM gallery ORDER BY id DESC').fetchall()
     conn.close()
     return render_template('admin/gallery.html', images=images)
-    
+
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
