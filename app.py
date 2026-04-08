@@ -28,6 +28,9 @@ def inject_settings():
     return dict(settings=get_settings())
 
 # --- PUBLIC ROUTES ---
+@app.route('/health')
+def health():
+    return "OK"
 
 @app.route('/')
 def index():
